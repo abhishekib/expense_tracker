@@ -16,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isSendingResetEmail = false;
 
   @override
   void dispose() {
@@ -52,6 +53,106 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text);
+
+    await showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Reset Password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Enter your email to receive a password reset link'),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty)
+                      return 'Please enter email';
+                    if (!value.contains('@')) return 'Invalid email format';
+                    return null;
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              StatefulBuilder(
+                builder:
+                    (context, setState) => TextButton(
+                      onPressed:
+                          _isSendingResetEmail
+                              ? null
+                              : () async {
+                                if (emailController.text.isEmpty ||
+                                    !emailController.text.contains('@')) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Please enter a valid email',
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                setState(() => _isSendingResetEmail = true);
+                                try {
+                                  await Provider.of<AuthProvider>(
+                                    context,
+                                    listen: false,
+                                  ).sendPasswordResetEmail(
+                                    emailController.text.trim(),
+                                  );
+
+                                  if (!mounted) return;
+
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Password reset email sent!',
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: ${e.toString()}'),
+                                    ),
+                                  );
+                                } finally {
+                                  setState(() => _isSendingResetEmail = false);
+                                }
+                              },
+                      child:
+                          _isSendingResetEmail
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text('Send Link'),
+                    ),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
@@ -104,10 +205,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Please enter email';
-                          if (!value.contains('@'))
+                          }
+                          if (!value.contains('@')) {
                             return 'Please enter valid email';
+                          }
                           return null;
                         },
                       ),
@@ -132,14 +235,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         obscureText: true,
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Please enter password';
+                          }
                           if (value.length < 6) return 'Password too short';
                           return null;
                         },
                       ),
-                      SizedBox(height: 30),
-
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed:
+                              _isLoading ? null : _showForgotPasswordDialog,
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
+                        ),
+                      ),
                       // Sign In Button
                       if (_isLoading)
                         CircularProgressIndicator()

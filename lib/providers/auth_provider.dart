@@ -44,7 +44,11 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-/*   Future<void> updateProfile({String? displayName, String? photoUrl}) async {
+  Future<void> sendPasswordResetEmail(String email) async {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
+
+  /*   Future<void> updateProfile({String? displayName, String? photoUrl}) async {
     try {
       await _auth.currentUser?.updateDisplayName(displayName);
       if (photoUrl != null) {
