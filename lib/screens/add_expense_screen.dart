@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key});
-
   @override
   _AddExpenseScreenState createState() => _AddExpenseScreenState();
 }
@@ -29,6 +27,38 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     'Other',
   ];
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor, // Header color
+              onPrimary: Colors.white, // Header text color
+              onSurface: Colors.black, // Body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    Theme.of(context).primaryColor, // Button text color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
   void _submitExpense() {
     if (_formKey.currentState!.validate()) {
       final newExpense = Expense(
@@ -46,19 +76,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
       Navigator.of(context).pop();
     }
-  }
-
-  void _showDatePicker() {
-    DatePicker.showDatePicker(
-      context,
-      showTitleActions: true,
-      minTime: DateTime(2000),
-      maxTime: DateTime(2100),
-      onConfirm: (date) {
-        setState(() => _selectedDate = date);
-      },
-      currentTime: _selectedDate,
-    );
   }
 
   @override
@@ -119,10 +136,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ListTile(
                 title: Text('Date'),
                 subtitle: Text(
-                  '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                  DateFormat('MMM dd, yyyy').format(_selectedDate),
                 ),
                 trailing: Icon(Icons.calendar_today),
-                onTap: _showDatePicker,
+                onTap: () => _selectDate(context),
               ),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
