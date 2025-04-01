@@ -27,23 +27,32 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         body: _screens[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: true,
+          selectedLabelStyle: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+          showUnselectedLabels: true,
+          unselectedLabelStyle: TextStyle(color: Colors.blueGrey),
+          selectedItemColor: Colors.black,
+
+          unselectedItemColor: Colors.blueGrey,
+          enableFeedback: true,
+          landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.history, color: Colors.black),
+              icon: Icon(Icons.history),
               label: 'History',
             ),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.add, color: Colors.black),
-              label: 'Add',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart, color: Colors.black),
+              icon: Icon(Icons.pie_chart),
               label: 'Reports',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet, color: Colors.black),
+              icon: Icon(Icons.account_balance_wallet),
               label: 'Budget',
             ),
           ],
