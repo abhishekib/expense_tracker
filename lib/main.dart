@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       title: 'Expense Tracker',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -28,4 +29,9 @@ class MyApp extends StatelessWidget {
       home: HomeScreen(),
     );
   }
+}
+
+class NavigationService {
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 }

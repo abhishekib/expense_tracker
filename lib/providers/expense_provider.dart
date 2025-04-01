@@ -20,7 +20,19 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   Future<void> addExpense(Expense newExpense) async {
-    await _expenseService.addExpense(newExpense);
+    try {
+      // Add to local state immediately for responsive UI
+      _expenses.add(newExpense);
+      notifyListeners();
+
+      // Sync with Firestore
+      await _expenseService.addExpense(newExpense);
+    } catch (e) {
+      // Revert if Firestore fails
+      _expenses.remove(newExpense);
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Future<void> updateExpense(String id, Expense updatedExpense) async {

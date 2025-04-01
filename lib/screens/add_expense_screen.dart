@@ -59,22 +59,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
   }
 
-  void _submitExpense() {
+  void _submitExpense() async {
     if (_formKey.currentState!.validate()) {
-      final newExpense = Expense(
-        id: Uuid().v4(),
-        title: _titleController.text,
-        amount: double.parse(_amountController.text),
-        date: _selectedDate,
-        category: _selectedCategory,
-      );
+      try {
+        final newExpense = Expense(
+          id: Uuid().v4(),
+          title: _titleController.text,
+          amount: double.parse(_amountController.text),
+          date: _selectedDate,
+          category: _selectedCategory,
+        );
 
-      Provider.of<ExpenseProvider>(
-        context,
-        listen: false,
-      ).addExpense(newExpense);
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Center(child: CircularProgressIndicator()),
+        );
 
-      Navigator.of(context).pop();
+        await Provider.of<ExpenseProvider>(
+          context,
+          listen: false,
+        ).addExpense(newExpense);
+
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      } catch (e) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving expense: ${e.toString()}')),
+        );
+      }
     }
   }
 
