@@ -1,4 +1,5 @@
 import 'package:expense_tracker/services/export_service.dart';
+import 'package:expense_tracker/widgets/main_drawer.dart';
 import 'package:expense_tracker/widgets/safe_stream_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,25 +22,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final expenses = _getFilteredExpenses(context);
 
     return Scaffold(
-      drawer: Drawer(
-        // Your drawer implementation here
-        child: ListView(
-          children: [
-            DrawerHeader(
-              child: Text('Expense Tracker'),
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            // Add more drawer items as needed
-          ],
-        ),
-      ),
+      drawer: MainDrawer(),
       appBar: AppBar(
         title: Text('Transaction History'),
         leading: Builder(
@@ -90,11 +73,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                   PopupMenuDivider(),
                   PopupMenuItem(
+                    enabled: false,
                     child: ListTile(
                       leading: Icon(Icons.sort),
                       title: Text('Sort Options'),
                     ),
-                    enabled: false,
                   ),
                   ..._buildSortOptions(),
                 ],

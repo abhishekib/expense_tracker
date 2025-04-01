@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:expense_tracker/screens/profile_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -42,44 +44,42 @@ class MainDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.home),
             title: Text('Home'),
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
           ),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
-            onTap: () {
-              // Add settings navigation
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
           ),
           Divider(),
-          ListTile(
-            leading: Icon(Icons.exit_to_app),
-            title: Text('Logout'),
-            onTap: () async {
-              Navigator.pop(context);
-              await _showLogoutConfirmation(context);
-            },
-          ),
           ListTile(
             leading: Icon(Icons.edit),
             title: Text('Edit Profile'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Close drawer first
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (ctx) => ProfileEditScreen()),
               );
             },
           ),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text('Logout'),
+            onTap: () => _handleLogout(context),
+          ),
         ],
       ),
     );
   }
 
-  Future<void> _showLogoutConfirmation(BuildContext context) async {
+  Future<void> _handleLogout(BuildContext context) async {
+    Navigator.pop(context);
+
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
@@ -88,26 +88,31 @@ class MainDrawer extends StatelessWidget {
             content: Text('Are you sure you want to logout?'),
             actions: [
               TextButton(
-                child: Text('Cancel'),
                 onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text('Cancel'),
               ),
               TextButton(
-                child: Text('Logout', style: TextStyle(color: Colors.red)),
                 onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text('Logout', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
     );
 
-    if (confirmed == true) {
-      try {
-        await Provider.of<AuthProvider>(context, listen: false).signOut();
-        Navigator.pushReplacement(
-          context,
+    if (confirmed != true || !navigator.mounted) return;
+
+    try {
+      await authProvider.signOut();
+      if (navigator.mounted) {
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(builder: (ctx) => LoginScreen()),
+          (route) => false,
         );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      }
+    } catch (e) {
+      log('Logout error: $e');
+      if (scaffoldMessenger.mounted) {
+        scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Logout failed: ${e.toString()}')),
         );
       }
