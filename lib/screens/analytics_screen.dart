@@ -7,7 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 class AnalyticsScreen extends StatefulWidget {
-  AnalyticsScreen({super.key});
+  const AnalyticsScreen({super.key});
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -141,7 +141,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Container(
+            SizedBox(
               height: 200,
               child: LineChart(
                 LineChartData(
@@ -211,7 +211,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Container(
+            SizedBox(
               height: 200,
               child: PieChart(
                 PieChartData(

@@ -1,4 +1,5 @@
 import 'package:expense_tracker/services/export_service.dart';
+import 'package:expense_tracker/widgets/safe_stream_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/models/expense.dart';
@@ -56,7 +57,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final expenses = _getFilteredExpenses(context);
 
     return Scaffold(
-      // Update the appBar in HistoryScreen
       appBar: AppBar(
         title: Text('Transaction History'),
         actions: [
@@ -86,7 +86,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           _buildSortButton(),
         ],
       ),
-      body: Column(
+      body: /* Column(
         children: [
           if (_dateRange != null) _buildDateRangeChip(),
           Expanded(
@@ -115,6 +115,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
         ],
+      ), */ SafeStreamBuilder<List<Expense>>(
+        stream: Provider.of<ExpenseProvider>(context).expensesStream,
+        initialData: [],
+        builder: (context, snapshot) {
+          final expenses = snapshot.data ?? [];
+
+          if (expenses.isEmpty) {
+            return Center(child: Text('No expenses found'));
+          }
+
+          return RefreshIndicator(
+            onRefresh:
+                () => Provider.of<ExpenseProvider>(context).refreshExpenses(),
+            child: ListView.builder(
+              itemCount: expenses.length,
+              itemBuilder:
+                  (ctx, index) => ExpenseTile(expense: expenses[index]),
+            ),
+          );
+        },
       ),
     );
   }

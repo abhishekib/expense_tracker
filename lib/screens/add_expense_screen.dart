@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
 class AddExpenseScreen extends StatefulWidget {
+  const AddExpenseScreen({super.key});
+
   @override
   _AddExpenseScreenState createState() => _AddExpenseScreenState();
 }
