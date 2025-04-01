@@ -218,44 +218,91 @@ class ExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: ListTile(
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              expense.category[0],
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+    return Dismissible(
+      key: Key(expense.id), // Unique key for each item
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder:
+              (ctx) => AlertDialog(
+                title: Text('Confirm Delete'),
+                content: Text('Are you sure you want to delete this expense?'),
+                actions: [
+                  TextButton(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                  ),
+                  TextButton(
+                    child: Text('Delete', style: TextStyle(color: Colors.red)),
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                  ),
+                ],
+              ),
+        );
+      },
+      onDismissed: (direction) async {
+        try {
+          await Provider.of<ExpenseProvider>(
+            context,
+            listen: false,
+          ).deleteExpense(expense.id);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Expense deleted successfully')),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete expense: $e')),
+          );
+          // Optional: Re-insert the item if deletion fails
+        }
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                expense.category[0],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
           ),
-        ),
-        title: Text(expense.title),
-        subtitle: Text(DateFormat('MMM d, y').format(expense.date)),
-        trailing: Text(
-          '\$${expense.amount.toStringAsFixed(2)}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (ctx) => EditExpenseScreen(expense: expense),
+          title: Text(expense.title),
+          subtitle: Text(DateFormat('MMM d, y').format(expense.date)),
+          trailing: Text(
+            '\$${expense.amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Theme.of(context).primaryColor,
             ),
-          );
-        },
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => EditExpenseScreen(expense: expense),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

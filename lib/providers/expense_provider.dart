@@ -53,6 +53,12 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   Future<void> deleteExpense(String id) async {
-    await _expenseService.deleteExpense(id);
+    try {
+      await _expenseService.deleteExpense(id);
+      _expenses.removeWhere((expense) => expense.id == id);
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to delete expense: $e');
+    }
   }
 }
