@@ -15,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,20 +25,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await Provider.of<AuthProvider>(
-          context,
-          listen: false,
-        ).signIn(_emailController.text.trim(), _passwordController.text.trim());
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (ctx) => HomeScreen()),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${e.toString()}')),
-        );
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).signIn(_emailController.text.trim(), _passwordController.text.trim());
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (ctx) => HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: ${e.toString()}')));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -74,16 +86,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(onPressed: _signIn, child: Text('Sign In')),
-              TextButton(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (ctx) => SignupScreen()),
-                    ),
-                child: Text('Create Account'),
-              ),
-              // Add Google/Facebook sign-in buttons here
+              if (_isLoading)
+                CircularProgressIndicator() 
+              else
+                ElevatedButton(onPressed: _signIn, child: Text('Sign In')),
+              if (!_isLoading)
+                TextButton(
+                  onPressed:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (ctx) => SignupScreen()),
+                      ),
+                  child: Text('Create Account'),
+                ),
             ],
           ),
         ),
