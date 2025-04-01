@@ -20,8 +20,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final expenses = _getFilteredExpenses(context);
-
     return Scaffold(
       drawer: MainDrawer(),
       appBar: AppBar(
@@ -47,6 +45,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 );
               } else if (value == 'date_range') {
                 _selectDateRange(context);
+              } else {
+                // Handle sorting changes
+                setState(() => _sortBy = value);
               }
             },
             itemBuilder:
@@ -89,7 +90,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         stream: Provider.of<ExpenseProvider>(context).expensesStream,
         initialData: [],
         builder: (context, snapshot) {
-          final expenses = snapshot.data ?? [];
+          final expenses = _getFilteredExpenses(snapshot.data ?? []);
 
           if (expenses.isEmpty) {
             return Center(child: Text('No expenses found'));
@@ -240,9 +241,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  List<Expense> _getFilteredExpenses(BuildContext context) {
-    List<Expense> expenses = Provider.of<ExpenseProvider>(context).expenses;
-
+  List<Expense> _getFilteredExpenses(List<Expense> expenses) {
     // Apply category filter
     if (_filterCategory != 'All') {
       expenses = expenses.where((e) => e.category == _filterCategory).toList();
@@ -263,19 +262,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // Apply sorting
     switch (_sortBy) {
       case 'date':
-        expenses.sort((a, b) => b.date.compareTo(a.date)); // Newest First
+        expenses.sort((a, b) => b.date.compareTo(a.date));
         break;
       case 'date_old':
-        expenses.sort((a, b) => a.date.compareTo(b.date)); // Oldest First
+        expenses.sort((a, b) => a.date.compareTo(b.date));
         break;
       case 'amount_high':
-        expenses.sort((a, b) => b.amount.compareTo(a.amount)); // High to Low
+        expenses.sort((a, b) => b.amount.compareTo(a.amount));
         break;
       case 'amount_low':
-        expenses.sort((a, b) => a.amount.compareTo(b.amount)); // Low to High
+        expenses.sort((a, b) => a.amount.compareTo(b.amount));
         break;
       case 'category':
-        expenses.sort((a, b) => a.category.compareTo(b.category)); // A-Z
+        expenses.sort((a, b) => a.category.compareTo(b.category));
         break;
     }
 
