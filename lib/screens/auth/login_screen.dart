@@ -57,49 +57,136 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter email';
-                  if (!value.contains('@')) return 'Please enter valid email';
-                  return null;
-                },
+      appBar: AppBar(title: Text('Sign In'), centerTitle: true),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: SingleChildScrollView(
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter password';
-                  if (value.length < 6) return 'Password too short';
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              if (_isLoading)
-                CircularProgressIndicator() 
-              else
-                ElevatedButton(onPressed: _signIn, child: Text('Sign In')),
-              if (!_isLoading)
-                TextButton(
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (ctx) => SignupScreen()),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Title
+                      Text(
+                        'Welcome Back!',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
                       ),
-                  child: Text('Create Account'),
+                      SizedBox(height: 30),
+
+                      // Email Input Field
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(
+                            Icons.email,
+                            color: Colors.blueAccent,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blueAccent),
+                          ),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                            return 'Please enter email';
+                          if (!value.contains('@'))
+                            return 'Please enter valid email';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+
+                      // Password Input Field
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: Colors.blueAccent,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blueAccent),
+                          ),
+                        ),
+                        obscureText: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                            return 'Please enter password';
+                          if (value.length < 6) return 'Password too short';
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 30),
+
+                      // Sign In Button
+                      if (_isLoading)
+                        CircularProgressIndicator()
+                      else
+                        ElevatedButton(
+                          onPressed: _signIn,
+                          style: ElevatedButton.styleFrom(
+                            // primary: Colors.blueAccent,
+                            padding: EdgeInsets.symmetric(
+                              vertical: 15,
+                              horizontal: 60,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Sign In',
+                            style: TextStyle(fontSize: 18, color: Colors.black),
+                          ),
+                        ),
+
+                      SizedBox(height: 20),
+
+                      // Create Account Link
+                      if (!_isLoading)
+                        TextButton(
+                          onPressed:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (ctx) => SignupScreen(),
+                                ),
+                              ),
+                          child: Text(
+                            'Create Account',
+                            style: TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),
