@@ -33,25 +33,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor, // Header color
-              onPrimary: Colors.white, // Header text color
-              onSurface: Colors.black, // Body text color
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor:
-                    Theme.of(context).primaryColor, // Button text color
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -59,7 +42,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
   }
 
-  void _submitExpense() async {
+  Future<void> _submitExpense() async {
     if (_formKey.currentState!.validate()) {
       try {
         final newExpense = Expense(
@@ -70,26 +53,34 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           category: _selectedCategory,
         );
 
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => Center(child: CircularProgressIndicator()),
-        );
-
         await Provider.of<ExpenseProvider>(
           context,
           listen: false,
         ).addExpense(newExpense);
 
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
+        // Reset form after successful submission
+        _resetForm();
+
+        // Show success message
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Expense added successfully!')));
       } catch (e) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving expense: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     }
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _titleController.clear();
+    _amountController.clear();
+    setState(() {
+      _selectedDate = DateTime.now();
+      _selectedCategory = 'Food';
+    });
   }
 
   @override
