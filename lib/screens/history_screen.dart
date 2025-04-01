@@ -263,19 +263,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // Apply sorting
     switch (_sortBy) {
       case 'date':
-        expenses.sort((a, b) => b.date.compareTo(a.date));
+        expenses.sort((a, b) => b.date.compareTo(a.date)); // Newest First
         break;
       case 'date_old':
-        expenses.sort((a, b) => a.date.compareTo(b.date));
+        expenses.sort((a, b) => a.date.compareTo(b.date)); // Oldest First
         break;
       case 'amount_high':
-        expenses.sort((a, b) => b.amount.compareTo(a.amount));
+        expenses.sort((a, b) => b.amount.compareTo(a.amount)); // High to Low
         break;
       case 'amount_low':
-        expenses.sort((a, b) => a.amount.compareTo(b.amount));
+        expenses.sort((a, b) => a.amount.compareTo(b.amount)); // Low to High
         break;
       case 'category':
-        expenses.sort((a, b) => a.category.compareTo(b.category));
+        expenses.sort((a, b) => a.category.compareTo(b.category)); // A-Z
         break;
     }
 
