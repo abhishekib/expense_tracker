@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/screens/auth/signup_screen.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
@@ -175,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-
+      log('Google sign in error: ------>$e');
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Google sign in failed: ${e.toString()}')),
       );
