@@ -75,14 +75,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           if (_dateRange != null) _buildDateRangeChip(),
           Expanded(
-            child:
-                expenses.isEmpty
-                    ? Center(child: Text('No expenses found'))
-                    : ListView.builder(
-                      itemCount: expenses.length,
-                      itemBuilder:
-                          (ctx, index) => ExpenseTile(expense: expenses[index]),
-                    ),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                /* await Provider.of<ExpenseProvider>(
+                  context,
+                  listen: false,
+                ).refreshExpenses(); */
+              },
+              child:
+                  expenses.isEmpty
+                      ? Center(child: Text('No expenses found'))
+                      : ListView.builder(
+                        itemCount: expenses.length,
+                        itemBuilder:
+                            (ctx, index) =>
+                                ExpenseTile(expense: expenses[index]),
+                      ),
+            ),
           ),
         ],
       ),
