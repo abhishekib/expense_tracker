@@ -1,3 +1,4 @@
+import 'package:expense_tracker/screens/analytics_screen.dart';
 import 'package:expense_tracker/screens/budget_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/screens/add_expense_screen.dart';
@@ -16,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
     AddExpenseScreen(),
     ReportsScreen(),
     BudgetScreen(),
+    AnalyticsScreen(),
   ];
 
   DateTime? _lastBackPressTime;
@@ -54,6 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.account_balance_wallet),
               label: 'Budget',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.analytics),
+              label: 'Analytics',
             ),
           ],
         ),
