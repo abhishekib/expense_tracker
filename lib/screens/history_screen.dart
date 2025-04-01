@@ -77,10 +77,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                /* await Provider.of<ExpenseProvider>(
-                  context,
-                  listen: false,
-                ).refreshExpenses(); */
+                try {
+                  await Provider.of<ExpenseProvider>(
+                    context,
+                    listen: false,
+                  ).refreshExpenses();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Refresh failed: ${e.toString()}')),
+                  );
+                }
               },
               child:
                   expenses.isEmpty

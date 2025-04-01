@@ -12,11 +12,24 @@ class ExpenseProvider with ChangeNotifier {
     _loadExpenses();
   }
 
-  void _loadExpenses() {
+  Future<void> _loadExpenses() async {
     _expenseService.expensesStream.listen((expenses) {
       _expenses = expenses;
       notifyListeners();
     });
+  }
+
+  Future<void> refreshExpenses() async {
+    try {
+      // Force a refresh by re-subscribing to the stream
+      await _loadExpenses();
+      // Alternatively, if using Firestore directly:
+      // final freshExpenses = await _expenseService.getExpenses();
+      // _expenses = freshExpenses;
+      // notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to refresh expenses: $e');
+    }
   }
 
   Future<void> addExpense(Expense newExpense) async {
