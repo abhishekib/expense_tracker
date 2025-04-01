@@ -21,13 +21,15 @@ dependencies:
   fl_chart: ^0.70.2
   csv: ^6.0.0
   google_sign_in: ^6.3.0
-  flutter_facebook_auth: ^7.1.1
+  path_provider: ^2.1.5
+  share_plus:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true

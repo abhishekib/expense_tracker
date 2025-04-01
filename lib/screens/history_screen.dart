@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override
@@ -177,14 +178,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final exporter = ExportService();
       final expenses =
           Provider.of<ExpenseProvider>(context, listen: false).expenses;
+
+      if (expenses.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No expenses to export')));
+        return;
+      }
+
       final csv = exporter.exportToCSV(expenses);
-      await exporter.saveCSV(
+      final file = await exporter.saveCSV(
         csv,
         'expenses_${DateTime.now().millisecondsSinceEpoch}.csv',
       );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Expenses exported successfully')));
+
+      // Open file picker to share/save
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: 'text/csv',
+        text: 'Exported Expenses',
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
