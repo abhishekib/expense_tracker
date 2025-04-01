@@ -1,5 +1,6 @@
 import 'package:expense_tracker/screens/analytics_screen.dart';
 import 'package:expense_tracker/screens/budget_screen.dart';
+import 'package:expense_tracker/widgets/main_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/screens/add_expense_screen.dart';
 import 'package:expense_tracker/screens/history_screen.dart';
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+        drawer: MainDrawer(),
         body: _screens[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           showSelectedLabels: true,

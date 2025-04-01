@@ -44,6 +44,19 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+/*   Future<void> updateProfile({String? displayName, String? photoUrl}) async {
+    try {
+      await _auth.currentUser?.updateDisplayName(displayName);
+      if (photoUrl != null) {
+        await _auth.currentUser?.updatePhotoURL(photoUrl);
+      }
+      _user = _auth.currentUser;
+      notifyListeners();
+    } catch (e) {
+      throw Exception('Failed to update profile: ${e.toString()}');
+    }
+  } */
+
   Future<void> signOut() async {
     await _authService.signOut();
   }

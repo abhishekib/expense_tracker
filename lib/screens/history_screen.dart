@@ -86,36 +86,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           _buildSortButton(),
         ],
       ),
-      body: /* Column(
-        children: [
-          if (_dateRange != null) _buildDateRangeChip(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                try {
-                  await Provider.of<ExpenseProvider>(
-                    context,
-                    listen: false,
-                  ).refreshExpenses();
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Refresh failed: ${e.toString()}')),
-                  );
-                }
-              },
-              child:
-                  expenses.isEmpty
-                      ? Center(child: Text('No expenses found'))
-                      : ListView.builder(
-                        itemCount: expenses.length,
-                        itemBuilder:
-                            (ctx, index) =>
-                                ExpenseTile(expense: expenses[index]),
-                      ),
-            ),
-          ),
-        ],
-      ), */ SafeStreamBuilder<List<Expense>>(
+      body: SafeStreamBuilder<List<Expense>>(
         stream: Provider.of<ExpenseProvider>(context).expensesStream,
         initialData: [],
         builder: (context, snapshot) {
@@ -126,8 +97,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
           }
 
           return RefreshIndicator(
-            onRefresh:
-                () => Provider.of<ExpenseProvider>(context).refreshExpenses(),
+            onRefresh: () async {
+              try {
+                await context.read<ExpenseProvider>().refreshExpenses();
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Refresh failed: ${e.toString()}')),
+                );
+                rethrow;
+              }
+            },
             child: ListView.builder(
               itemCount: expenses.length,
               itemBuilder:
@@ -190,16 +169,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
             PopupMenuItem(value: 'category', child: Text('Sort by Category')),
           ],
       onSelected: (value) => setState(() => _sortBy = value),
-    );
-  }
-
-  Widget _buildDateRangeChip() {
-    return Chip(
-      label: Text(
-        '${DateFormat('MMM d').format(_dateRange!.start)} - '
-        '${DateFormat('MMM d').format(_dateRange!.end)}',
-      ),
-      onDeleted: () => setState(() => _dateRange = null),
     );
   }
 

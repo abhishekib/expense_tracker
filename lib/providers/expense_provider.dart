@@ -5,8 +5,8 @@ import 'package:expense_tracker/services/expense_service.dart';
 class ExpenseProvider with ChangeNotifier {
   final ExpenseService _expenseService = ExpenseService();
   List<Expense> _expenses = [];
-
-  List<Expense> get expenses => _expenses;
+  final List<Expense> _pendingExpenses = [];
+  List<Expense> get expenses => [..._expenses, ..._pendingExpenses];
 
   ExpenseProvider() {
     _loadExpenses();
@@ -34,17 +34,33 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> addExpense(Expense newExpense) async {
     try {
-      // Add to local state immediately for responsive UI
-      _expenses.add(newExpense);
+      // Add to pending first for offline support
+      _pendingExpenses.add(newExpense);
       notifyListeners();
 
-      // Sync with Firestore
+      // Try to sync with Firebase
       await _expenseService.addExpense(newExpense);
-    } catch (e) {
-      // Revert if Firestore fails
-      _expenses.remove(newExpense);
+
+      // If successful, move from pending to main list
+      _pendingExpenses.remove(newExpense);
+      _expenses.add(newExpense);
       notifyListeners();
-      rethrow;
+    } catch (e) {
+      // Keep in pending queue if offline
+      debugPrint('Expense saved locally: ${e.toString()}');
+    }
+  }
+
+  Future<void> syncPendingExpenses() async {
+    try {
+      for (final expense in List.of(_pendingExpenses)) {
+        await _expenseService.addExpense(expense);
+        _pendingExpenses.remove(expense);
+        _expenses.add(expense);
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Sync failed: ${e.toString()}');
     }
   }
 
