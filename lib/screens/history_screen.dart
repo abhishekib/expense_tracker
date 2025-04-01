@@ -4,34 +4,147 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:intl/intl.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
+  @override
+  _HistoryScreenState createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  String _sortBy = 'date';
+  String _filterCategory = 'All';
+  DateTimeRange? _dateRange;
+
   @override
   Widget build(BuildContext context) {
-    final expenses = Provider.of<ExpenseProvider>(context).expenses;
+    final expenses = _getFilteredExpenses(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Transaction History'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {
-              // Will implement filtering later
-            },
+        actions: [_buildFilterButton(), _buildSortButton()],
+      ),
+      body: Column(
+        children: [
+          if (_dateRange != null) _buildDateRangeChip(),
+          Expanded(
+            child:
+                expenses.isEmpty
+                    ? Center(child: Text('No expenses found'))
+                    : ListView.builder(
+                      itemCount: expenses.length,
+                      itemBuilder:
+                          (ctx, index) => ExpenseTile(expense: expenses[index]),
+                    ),
           ),
         ],
       ),
-      body:
-          expenses.isEmpty
-              ? Center(child: Text('No expenses recorded yet!'))
-              : ListView.builder(
-                itemCount: expenses.length,
-                itemBuilder: (ctx, index) {
-                  final expense = expenses[index];
-                  return ExpenseTile(expense: expense);
-                },
-              ),
     );
+  }
+
+  Widget _buildFilterButton() {
+    return PopupMenuButton(
+      icon: Icon(Icons.filter_alt),
+      itemBuilder:
+          (context) => [
+            PopupMenuItem(
+              child: Text('Select Date Range'),
+              onTap: () async {
+                final range = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (range != null) {
+                  setState(() => _dateRange = range);
+                }
+              },
+            ),
+            PopupMenuItem(
+              child: Text('Reset Filters'),
+              onTap:
+                  () => setState(() {
+                    _filterCategory = 'All';
+                    _dateRange = null;
+                  }),
+            ),
+          ],
+    );
+  }
+
+  Widget _buildSortButton() {
+    return PopupMenuButton(
+      icon: Icon(Icons.sort),
+      itemBuilder:
+          (context) => [
+            PopupMenuItem(value: 'date', child: Text('Sort by Date (Newest)')),
+            PopupMenuItem(
+              value: 'date_old',
+              child: Text('Sort by Date (Oldest)'),
+            ),
+            PopupMenuItem(
+              value: 'amount_high',
+              child: Text('Sort by Amount (High-Low)'),
+            ),
+            PopupMenuItem(
+              value: 'amount_low',
+              child: Text('Sort by Amount (Low-High)'),
+            ),
+            PopupMenuItem(value: 'category', child: Text('Sort by Category')),
+          ],
+      onSelected: (value) => setState(() => _sortBy = value),
+    );
+  }
+
+  Widget _buildDateRangeChip() {
+    return Chip(
+      label: Text(
+        '${DateFormat('MMM d').format(_dateRange!.start)} - '
+        '${DateFormat('MMM d').format(_dateRange!.end)}',
+      ),
+      onDeleted: () => setState(() => _dateRange = null),
+    );
+  }
+
+  List<Expense> _getFilteredExpenses(BuildContext context) {
+    List<Expense> expenses = Provider.of<ExpenseProvider>(context).expenses;
+
+    // Apply category filter
+    if (_filterCategory != 'All') {
+      expenses = expenses.where((e) => e.category == _filterCategory).toList();
+    }
+
+    // Apply date range filter
+    if (_dateRange != null) {
+      expenses =
+          expenses
+              .where(
+                (e) =>
+                    e.date.isAfter(_dateRange!.start) &&
+                    e.date.isBefore(_dateRange!.end),
+              )
+              .toList();
+    }
+
+    // Apply sorting
+    switch (_sortBy) {
+      case 'date':
+        expenses.sort((a, b) => b.date.compareTo(a.date));
+        break;
+      case 'date_old':
+        expenses.sort((a, b) => a.date.compareTo(b.date));
+        break;
+      case 'amount_high':
+        expenses.sort((a, b) => b.amount.compareTo(a.amount));
+        break;
+      case 'amount_low':
+        expenses.sort((a, b) => a.amount.compareTo(b.amount));
+        break;
+      case 'category':
+        expenses.sort((a, b) => a.category.compareTo(b.category));
+        break;
+    }
+
+    return expenses;
   }
 }
 
