@@ -2,32 +2,30 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     final expenses = Provider.of<ExpenseProvider>(context).expenses;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Expense Reports')),
+      appBar: AppBar(title: const Text('Expense Reports')),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildMonthlySpendingChart(expenses),
-            SizedBox(height: 30),
-            _buildCategoryPieChart(expenses),
+            _buildMonthlySpendingCard(expenses),
+            const SizedBox(height: 20),
+            _buildCategoryPieChartCard(expenses),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMonthlySpendingChart(List<Expense> expenses) {
+  Widget _buildMonthlySpendingCard(List<Expense> expenses) {
     // Group expenses by month
     final monthlyData = <String, double>{};
     final dateFormat = DateFormat('MMM yyyy');
@@ -41,37 +39,65 @@ class ReportsScreen extends StatelessWidget {
       );
     }
 
-    final series = [
-      charts.Series<MapEntry<String, double>, String>(
-        id: 'Monthly Spending',
-        domainFn: (entry, _) => entry.key,
-        measureFn: (entry, _) => entry.value,
-        data: monthlyData.entries.toList(),
-        labelAccessorFn: (entry, _) => '\$${entry.value.toStringAsFixed(2)}',
-      ),
-    ];
+    final monthlyEntries = monthlyData.entries.toList();
 
     return Card(
       elevation: 4,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Monthly Spending',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
-            Container(
+            const SizedBox(height: 10),
+            SizedBox(
               height: 250,
-              child: charts.BarChart(
-                series,
-                animate: true,
-                vertical: false,
-                barRendererDecorator: charts.BarLabelDecorator<String>(),
-                domainAxis: charts.OrdinalAxisSpec(
-                  renderSpec: charts.SmallTickRendererSpec(labelRotation: 45),
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  barTouchData: BarTouchData(enabled: true),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              monthlyEntries[value.toInt()].key,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text('\$${value.toInt()}');
+                        },
+                      ),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  barGroups: List.generate(
+                    monthlyEntries.length,
+                    (index) => BarChartGroupData(
+                      x: index,
+                      barRods: [
+                        BarChartRodData(
+                          toY: monthlyEntries[index].value,
+                          color: Colors.blue,
+                          width: 16,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -81,7 +107,7 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryPieChart(List<Expense> expenses) {
+  Widget _buildCategoryPieChartCard(List<Expense> expenses) {
     // Group expenses by category
     final categoryData = <String, double>{};
 
@@ -93,40 +119,53 @@ class ReportsScreen extends StatelessWidget {
       );
     }
 
-    final series = [
-      charts.Series<MapEntry<String, double>, String>(
-        id: 'Category Breakdown',
-        domainFn: (entry, _) => entry.key,
-        measureFn: (entry, _) => entry.value,
-        data: categoryData.entries.toList(),
-        labelAccessorFn:
-            (entry, _) => '${entry.key}: \$${entry.value.toStringAsFixed(2)}',
-      ),
+    final categoryEntries = categoryData.entries.toList();
+    final colors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
     ];
 
     return Card(
       elevation: 4,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Category Breakdown',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
-            Container(
+            const SizedBox(height: 10),
+            SizedBox(
               height: 300,
-              child: charts.PieChart(
-                series,
-                animate: true,
-                defaultRenderer: charts.ArcRendererConfig(
-                  arcRendererDecorators: [
-                    charts.ArcLabelDecorator(
-                      labelPosition: charts.ArcLabelPosition.auto,
+              child: PieChart(
+                PieChartData(
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 60,
+                  sections: List.generate(
+                    categoryEntries.length,
+                    (index) => PieChartSectionData(
+                      color: colors[index % colors.length],
+                      value: categoryEntries[index].value,
+                      title:
+                          '${categoryEntries[index].key}\n'
+                          '\$${categoryEntries[index].value.toStringAsFixed(0)}',
+                      radius: 20,
+                      titleStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ],
+                  ),
+                  pieTouchData: PieTouchData(
+                    touchCallback: (FlTouchEvent event, pieTouchResponse) {},
+                  ),
                 ),
               ),
             ),
