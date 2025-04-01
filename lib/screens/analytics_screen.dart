@@ -90,6 +90,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
+            _buildTimePeriodSelector(),
+            SizedBox(height: 20),
             _buildMonthlySpendingChart(expenses),
             SizedBox(height: 20),
             _buildCategoryBreakdown(expenses),
@@ -97,8 +99,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             _buildBudgetCompliance(budgetProvider, expenses),
             SizedBox(height: 20),
             _buildSpendingInsights(expenses),
-            SizedBox(height: 20),
-            _buildTimePeriodSelector(),
           ],
         ),
       ),
