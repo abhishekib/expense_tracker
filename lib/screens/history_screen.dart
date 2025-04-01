@@ -16,74 +16,89 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String _filterCategory = 'All';
   DateTimeRange? _dateRange;
 
-  // Add this method to _HistoryScreenState
-  Widget _buildCategoryFilterDialog(BuildContext context) {
-    final categories =
-        Provider.of<ExpenseProvider>(
-          context,
-        ).expenses.map((e) => e.category).toSet().toList();
-
-    categories.insert(0, 'All');
-
-    return AlertDialog(
-      title: Text('Filter by Category'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: categories.length,
-          itemBuilder:
-              (ctx, index) => ListTile(
-                title: Text(categories[index]),
-                trailing:
-                    _filterCategory == categories[index]
-                        ? Icon(
-                          Icons.check,
-                          color: Theme.of(context).primaryColor,
-                        )
-                        : null,
-                onTap: () {
-                  setState(() => _filterCategory = categories[index]);
-                  Navigator.pop(context);
-                },
-              ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final expenses = _getFilteredExpenses(context);
 
     return Scaffold(
+      drawer: Drawer(
+        // Your drawer implementation here
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Text('Expense Tracker'),
+              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            // Add more drawer items as needed
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: Text('Transaction History'),
+        leading: Builder(
+          builder:
+              (context) => IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.category),
-            onPressed:
-                () => showDialog(
+          // Combined filter and sort button
+          PopupMenuButton<String>(
+            icon: Icon(Icons.tune),
+            onSelected: (value) {
+              if (value == 'export') {
+                _exportToCSV(context);
+              } else if (value == 'categories') {
+                showDialog(
                   context: context,
                   builder: _buildCategoryFilterDialog,
-                ),
-          ),
-          IconButton(
-            icon: Icon(Icons.upload),
-            onPressed: () async {
-              final exporter = ExportService();
-              final csv = exporter.exportToCSV(expenses);
-              await exporter.saveCSV(
-                csv,
-                'expenses_${DateTime.now().millisecondsSinceEpoch}.csv',
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Expenses exported successfully')),
-              );
+                );
+              } else if (value == 'date_range') {
+                _selectDateRange(context);
+              }
             },
+            itemBuilder:
+                (context) => [
+                  PopupMenuItem(
+                    value: 'categories',
+                    child: ListTile(
+                      leading: Icon(Icons.category),
+                      title: Text('Filter by Category'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'date_range',
+                    child: ListTile(
+                      leading: Icon(Icons.date_range),
+                      title: Text('Select Date Range'),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'export',
+                    child: ListTile(
+                      leading: Icon(Icons.upload),
+                      title: Text('Export to CSV'),
+                    ),
+                  ),
+                  PopupMenuDivider(),
+                  PopupMenuItem(
+                    child: ListTile(
+                      leading: Icon(Icons.sort),
+                      title: Text('Sort Options'),
+                    ),
+                    enabled: false,
+                  ),
+                  ..._buildSortOptions(),
+                ],
           ),
-          _buildFilterButton(),
-          _buildSortButton(),
         ],
       ),
       body: SafeStreamBuilder<List<Expense>>(
@@ -118,57 +133,114 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildFilterButton() {
-    return PopupMenuButton(
-      icon: Icon(Icons.filter_alt),
-      itemBuilder:
-          (context) => [
-            PopupMenuItem(
-              child: Text('Select Date Range'),
-              onTap: () async {
-                final range = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (range != null) {
-                  setState(() => _dateRange = range);
-                }
-              },
-            ),
-            PopupMenuItem(
-              child: Text('Reset Filters'),
-              onTap:
-                  () => setState(() {
-                    _filterCategory = 'All';
-                    _dateRange = null;
-                  }),
-            ),
-          ],
-    );
+  List<PopupMenuItem<String>> _buildSortOptions() {
+    return [
+      PopupMenuItem(
+        value: 'date',
+        child: ListTile(
+          leading: Icon(Icons.arrow_downward),
+          title: Text('Date (Newest First)'),
+          trailing: _sortBy == 'date' ? Icon(Icons.check) : null,
+        ),
+      ),
+      PopupMenuItem(
+        value: 'date_old',
+        child: ListTile(
+          leading: Icon(Icons.arrow_upward),
+          title: Text('Date (Oldest First)'),
+          trailing: _sortBy == 'date_old' ? Icon(Icons.check) : null,
+        ),
+      ),
+      PopupMenuItem(
+        value: 'amount_high',
+        child: ListTile(
+          leading: Icon(Icons.arrow_downward),
+          title: Text('Amount (High to Low)'),
+          trailing: _sortBy == 'amount_high' ? Icon(Icons.check) : null,
+        ),
+      ),
+      PopupMenuItem(
+        value: 'amount_low',
+        child: ListTile(
+          leading: Icon(Icons.arrow_upward),
+          title: Text('Amount (Low to High)'),
+          trailing: _sortBy == 'amount_low' ? Icon(Icons.check) : null,
+        ),
+      ),
+      PopupMenuItem(
+        value: 'category',
+        child: ListTile(
+          leading: Icon(Icons.sort_by_alpha),
+          title: Text('Category (A-Z)'),
+          trailing: _sortBy == 'category' ? Icon(Icons.check) : null,
+        ),
+      ),
+    ];
   }
 
-  Widget _buildSortButton() {
-    return PopupMenuButton(
-      icon: Icon(Icons.sort),
-      itemBuilder:
-          (context) => [
-            PopupMenuItem(value: 'date', child: Text('Sort by Date (Newest)')),
-            PopupMenuItem(
-              value: 'date_old',
-              child: Text('Sort by Date (Oldest)'),
-            ),
-            PopupMenuItem(
-              value: 'amount_high',
-              child: Text('Sort by Amount (High-Low)'),
-            ),
-            PopupMenuItem(
-              value: 'amount_low',
-              child: Text('Sort by Amount (Low-High)'),
-            ),
-            PopupMenuItem(value: 'category', child: Text('Sort by Category')),
-          ],
-      onSelected: (value) => setState(() => _sortBy = value),
+  Future<void> _selectDateRange(BuildContext context) async {
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (range != null) {
+      setState(() => _dateRange = range);
+    }
+  }
+
+  Future<void> _exportToCSV(BuildContext context) async {
+    try {
+      final exporter = ExportService();
+      final expenses =
+          Provider.of<ExpenseProvider>(context, listen: false).expenses;
+      final csv = exporter.exportToCSV(expenses);
+      await exporter.saveCSV(
+        csv,
+        'expenses_${DateTime.now().millisecondsSinceEpoch}.csv',
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Expenses exported successfully')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Export failed: ${e.toString()}')));
+    }
+  }
+
+  Widget _buildCategoryFilterDialog(BuildContext context) {
+    final categories =
+        Provider.of<ExpenseProvider>(
+          context,
+        ).expenses.map((e) => e.category).toSet().toList();
+
+    categories.insert(0, 'All');
+
+    return AlertDialog(
+      title: Text('Filter by Category'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: categories.length,
+          itemBuilder:
+              (ctx, index) => ListTile(
+                title: Text(categories[index]),
+                trailing:
+                    _filterCategory == categories[index]
+                        ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).primaryColor,
+                        )
+                        : null,
+                onTap: () {
+                  setState(() => _filterCategory = categories[index]);
+                  Navigator.pop(context);
+                },
+              ),
+        ),
+      ),
     );
   }
 
