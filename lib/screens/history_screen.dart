@@ -1,3 +1,4 @@
+import 'package:expense_tracker/services/export_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/models/expense.dart';
@@ -66,6 +67,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   context: context,
                   builder: _buildCategoryFilterDialog,
                 ),
+          ),
+          IconButton(
+            icon: Icon(Icons.upload),
+            onPressed: () async {
+              final exporter = ExportService();
+              final csv = exporter.exportToCSV(expenses);
+              await exporter.saveCSV(
+                csv,
+                'expenses_${DateTime.now().millisecondsSinceEpoch}.csv',
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Expenses exported successfully')),
+              );
+            },
           ),
           _buildFilterButton(),
           _buildSortButton(),

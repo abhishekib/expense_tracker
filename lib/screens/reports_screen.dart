@@ -1,4 +1,5 @@
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/providers/budget_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
@@ -19,6 +20,44 @@ class ReportsScreen extends StatelessWidget {
             _buildMonthlySpendingCard(expenses),
             const SizedBox(height: 20),
             _buildCategoryPieChartCard(expenses),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBudgetProgress(List<Expense> expenses, BuildContext context) {
+    final budgetProvider = Provider.of<BudgetProvider>(context);
+    final remaining = budgetProvider.getRemainingBudget(expenses);
+    final double percentage =
+        budgetProvider.monthlyBudget > 0
+            ? (1 - (remaining / budgetProvider.monthlyBudget)).clamp(0, 1)
+            : 0;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Monthly Budget Progress',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: percentage,
+              backgroundColor: Colors.grey[200],
+              color: percentage > 0.9 ? Colors.red : Colors.green,
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Remaining: \$${remaining.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: remaining < 0 ? Colors.red : Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
