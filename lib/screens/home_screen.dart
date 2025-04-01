@@ -1,3 +1,4 @@
+import 'package:expense_tracker/screens/budget_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/screens/add_expense_screen.dart';
 import 'package:expense_tracker/screens/history_screen.dart';
@@ -14,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
     HistoryScreen(),
     AddExpenseScreen(),
     ReportsScreen(),
+    BudgetScreen(),
   ];
 
   DateTime? _lastBackPressTime;
@@ -29,13 +31,20 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.history),
+              icon: Icon(Icons.history, color: Colors.black),
               label: 'History',
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart),
+              icon: Icon(Icons.add, color: Colors.black),
+              label: 'Add',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.pie_chart, color: Colors.black),
               label: 'Reports',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_wallet, color: Colors.black),
+              label: 'Budget',
             ),
           ],
         ),
@@ -55,8 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return false;
       }
       return true;
-    }
-    else {
+    } else {
       setState(() => _currentIndex = 0);
       return false;
     }

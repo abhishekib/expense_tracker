@@ -1,3 +1,4 @@
+import 'package:expense_tracker/providers/budget_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,10 @@ void main() async {
   await Firebase.initializeApp();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ExpenseProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (_) => BudgetProvider()),
+      ],
       child: MyApp(),
     ),
   );

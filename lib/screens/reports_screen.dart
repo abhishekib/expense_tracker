@@ -20,6 +20,8 @@ class ReportsScreen extends StatelessWidget {
             _buildMonthlySpendingCard(expenses),
             const SizedBox(height: 20),
             _buildCategoryPieChartCard(expenses),
+            const SizedBox(height: 20),
+            _buildBudgetProgress(expenses, context),
           ],
         ),
       ),
