@@ -14,14 +14,62 @@ class _HistoryScreenState extends State<HistoryScreen> {
   String _filterCategory = 'All';
   DateTimeRange? _dateRange;
 
+  // Add this method to _HistoryScreenState
+  Widget _buildCategoryFilterDialog(BuildContext context) {
+    final categories =
+        Provider.of<ExpenseProvider>(
+          context,
+        ).expenses.map((e) => e.category).toSet().toList();
+
+    categories.insert(0, 'All');
+
+    return AlertDialog(
+      title: Text('Filter by Category'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: categories.length,
+          itemBuilder:
+              (ctx, index) => ListTile(
+                title: Text(categories[index]),
+                trailing:
+                    _filterCategory == categories[index]
+                        ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).primaryColor,
+                        )
+                        : null,
+                onTap: () {
+                  setState(() => _filterCategory = categories[index]);
+                  Navigator.pop(context);
+                },
+              ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final expenses = _getFilteredExpenses(context);
 
     return Scaffold(
+      // Update the appBar in HistoryScreen
       appBar: AppBar(
         title: Text('Transaction History'),
-        actions: [_buildFilterButton(), _buildSortButton()],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.category),
+            onPressed:
+                () => showDialog(
+                  context: context,
+                  builder: _buildCategoryFilterDialog,
+                ),
+          ),
+          _buildFilterButton(),
+          _buildSortButton(),
+        ],
       ),
       body: Column(
         children: [
@@ -155,70 +203,44 @@ class ExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expenseProvider = Provider.of<ExpenseProvider>(
-      context,
-      listen: false,
-    );
-    final dateFormat = DateFormat('MMM dd, yyyy');
-
-    return Dismissible(
-      key: ValueKey(expense.id),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 20),
-        child: Icon(Icons.delete, color: Colors.white),
-      ),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) async {
-        return await showDialog(
-          context: context,
-          builder:
-              (ctx) => AlertDialog(
-                title: Text('Confirm Delete'),
-                content: Text('Are you sure you want to delete this expense?'),
-                actions: [
-                  TextButton(
-                    child: Text('Cancel'),
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                  ),
-                  TextButton(
-                    child: Text('Delete'),
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                  ),
-                ],
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              expense.category[0],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
               ),
-        );
-      },
-      onDismissed: (direction) {
-        expenseProvider.deleteExpense(expense.id);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Expense deleted')));
-      },
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: ListTile(
-          leading: CircleAvatar(child: Text(expense.category[0])),
-          title: Text(expense.title),
-          subtitle: Text(dateFormat.format(expense.date)),
-          trailing: Text(
-            '\$${expense.amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Theme.of(context).primaryColor,
             ),
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (ctx) => EditExpenseScreen(expense: expense),
-              ),
-            );
-          },
         ),
+        title: Text(expense.title),
+        subtitle: Text(DateFormat('MMM d, y').format(expense.date)),
+        trailing: Text(
+          '\$${expense.amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) => EditExpenseScreen(expense: expense),
+            ),
+          );
+        },
       ),
     );
   }
