@@ -364,6 +364,47 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
       appBar: AppBar(
         title: Text('Edit Expense'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              final confirmed = await showDialog(
+                context: context,
+                builder:
+                    (ctx) => AlertDialog(
+                      title: Text('Confirm Delete'),
+                      content: Text('Delete this expense permanently?'),
+                      actions: [
+                        TextButton(
+                          child: Text('Cancel'),
+                          onPressed: () => Navigator.of(ctx).pop(false),
+                        ),
+                        TextButton(
+                          child: Text('Delete'),
+                          onPressed: () => Navigator.of(ctx).pop(true),
+                        ),
+                      ],
+                    ),
+              );
+
+              if (confirmed == true) {
+                try {
+                  await Provider.of<ExpenseProvider>(
+                    context,
+                    listen: false,
+                  ).deleteExpense(widget.expense.id);
+
+                  Navigator.of(context).pop(); // Close edit screen
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Expense deleted')));
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+                }
+              }
+            },
+          ),
           IconButton(icon: Icon(Icons.check), onPressed: _updateExpense),
         ],
       ),
