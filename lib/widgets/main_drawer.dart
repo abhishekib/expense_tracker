@@ -1,11 +1,10 @@
 import 'dart:developer';
 
-import 'package:expense_tracker/screens/profile_edit_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/screens/auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MainDrawer extends StatelessWidget {
   @override
@@ -46,7 +45,7 @@ class MainDrawer extends StatelessWidget {
             title: Text('Home'),
             onTap: () => Navigator.pop(context),
           ),
-          ListTile(
+          /* ListTile(
             leading: Icon(Icons.settings),
             title: Text('Settings'),
             onTap: () => Navigator.pop(context),
@@ -62,7 +61,7 @@ class MainDrawer extends StatelessWidget {
                 MaterialPageRoute(builder: (ctx) => ProfileEditScreen()),
               );
             },
-          ),
+          ), */
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),

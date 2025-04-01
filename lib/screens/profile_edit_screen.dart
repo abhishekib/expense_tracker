@@ -1,7 +1,5 @@
-import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   @override

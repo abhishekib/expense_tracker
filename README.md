@@ -107,3 +107,58 @@ dependencies:
 
 - Android
 - iOS
+
+## Project Structure
+
+```
+expense_tracker/
+├── lib/
+│   ├── models/
+│   │   ├── expense.dart
+│   │   └── user.dart
+│   ├── providers/
+│   │   ├── auth_provider.dart
+│   │   ├── budget_provider.dart
+│   │   └── expense_provider.dart
+│   ├── screens/
+│   │   ├── auth/
+│   │   │   ├── login_screen.dart
+│   │   │   ├── signup_screen.dart
+│   │   │   └── email_verification_screen.dart
+│   │   ├── add_expense_screen.dart
+│   │   ├── analytics_screen.dart
+│   │   ├── budget_screen.dart
+│   │   ├── history_screen.dart
+│   │   ├── home_screen.dart
+│   │   ├── profile_edit_screen.dart
+│   │   └── reports_screen.dart
+│   ├── services/
+│   │   ├── auth_service.dart
+│   │   ├── expense_service.dart
+│   │   └── export_service.dart
+│   ├── widgets/
+│   │   ├── expense_tile.dart
+│   │   ├── main_drawer.dart
+│   │   └── safe_stream_builder.dart
+│   ├── firebase_options.dart
+│   └── main.dart
+├── android/
+│   └── google-services.json
+├── ios/
+│   └── GoogleService-Info.plist
+├── pubspec.yaml
+└── README.md
+```
+
+The project follows a well-organized structure:
+
+- **lib/**: Contains all Dart source code
+
+  - **models/**: Data models and entities
+  - **providers/**: State management using Provider
+  - **screens/**: UI screens and pages
+  - **services/**: Business logic and API interactions
+  - **widgets/**: Reusable UI components
+
+- **android/**: Android-specific configurations
+- **ios/**: iOS-specific configurations
