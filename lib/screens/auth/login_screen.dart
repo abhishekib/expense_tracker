@@ -1,5 +1,6 @@
 import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/screens/auth/signup_screen.dart';
+import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           listen: false,
         ).signIn(_emailController.text.trim(), _passwordController.text.trim());
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (ctx) => HomeScreen()),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login failed: ${e.toString()}')),
